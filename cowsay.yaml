@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: cowsay
+  name: cowsay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cowsay
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: cowsay
+    spec:
+      containers:
+      - image: us.gcr.io/daniel-cluster/cowsay:1
+        name: cowsay
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cowsay-service
+spec:
+  selector:
+    app: cowsay
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cowsay-ingress
+  annotations:
+    #   nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: ingress.cowsay.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cowsay-service
+            port:
+              number: 80
